@@ -146,7 +146,7 @@ async function fetchDogIds(
   }
 }
 
-interface DogDetail {
+export interface DogDetail {
   img: string;
   name: string;
   age: number;

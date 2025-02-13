@@ -1,5 +1,5 @@
 "use client";
-import { useDogSearch } from "@/app/hooks/useDogSearch.hook";
+import { DogDetail, useDogSearch } from "@/app/hooks/useDogSearch.hook";
 import {
   SearchBar,
   SearchFilters,
@@ -9,11 +9,15 @@ import {
 } from "../search-bar/search-bar.component";
 import LoginForm from "../login-form/login-form.component";
 import { LOGIN_ENDPOINT, LOGOUT_ENDPOINT } from "@/app/api/api.types";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   OptionDropdown,
   DropdownOption,
 } from "../sortby-dropdown/sortby-dropdown.component";
+import Modal from "../modal/modal.component";
+import { DogGallery } from "../dog-gallery/dog-gallery.component";
+import { FavoritesContext } from "@/app/context/favorites.context";
+import { DogMatch } from "@/app/api/endpoints/dogs/dog-match.endpoint";
 import { DogDetailCard } from "../dog-detail-card/dog-detail-card.component";
 
 const SORT_OPTIONS: DropdownOption[] = [
@@ -25,14 +29,19 @@ const SORT_DIRECTION_OPTIONS: DropdownOption[] = [
   { name: "ascending", value: "asc" },
   { name: "descending", value: "desc" },
 ];
+
 export function SearchPage() {
   const [filters, setFilters] = useState<SearchFilters>({});
   const [sortBy, setSortBy] = useState<SearchSortBy>({
     field: "breed",
     direction: "asc",
   });
-
   const { dogs, total, next, search } = useDogSearch();
+  const [matchModalOpen, setMatchModalOpen] = useState(false);
+  const [matchDogId, setMatchDog] = useState<string>();
+  const { favorites } = useContext(FavoritesContext);
+  const favoriteDogs = Object.values(favorites);
+  const matchedDogDetail: DogDetail | undefined = favorites[matchDogId ?? ""];
 
   useEffect(() => {
     search(
@@ -86,6 +95,18 @@ export function SearchPage() {
     search(filters, updatedSortBy);
   };
 
+  const openModal = () => {
+    setMatchModalOpen(true);
+  };
+  const handleFindMatch = async () => {
+    setMatchDog(undefined);
+    try {
+      const matchResponse = await DogMatch(favoriteDogs.map((d) => d.id));
+      setMatchDog(matchResponse.match);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error: unknown) {}
+  };
+
   return (
     <>
       <header className="sticky top-0 z-10 flex flex-col items-center justify-center bg-white shadow-md">
@@ -93,6 +114,10 @@ export function SearchPage() {
         {dogs.length > 0 && (
           <div className="w-full flex flex-row justify-between items-center px-6 border-b border-t">
             <p>{total} results</p>
+
+            <button onClick={openModal}>See Favorites</button>
+
+            {/* {Sorting} */}
             <div className="flex flew-row">
               <div className="">
                 <p>Sort by</p>
@@ -117,35 +142,10 @@ export function SearchPage() {
           </div>
         )}
       </header>
-      
+
       <main className="overflow-scroll flex flex-col items-center pt-4 bg-gray-200 h-screen">
         <div className="container">
-          <div className="grid gap-4 justify-center md:grid-cols-[320px_320px] lg:grid-cols-[320px_320px_320px] ">
-            {dogs?.map((dog) => (
-              <DogDetailCard
-                key={dog.id}
-                imageSrc={dog.img}
-                altText={`A ${dog.breed} called ${dog.name}`}
-              >
-                <div className="h-full flex flex-col items-center  p-4 justify-between">
-                  <div className="self-start flex flex-col gap-1">
-                    {" "}
-                    <p className="font-bold text-xl self-start">{dog.name}</p>
-                    <p className="font-semibold text-sm text-gray-400 self-start">
-                      {dog.breed}
-                    </p>
-                    <p className="font-normal text-sm text-gray-400 self-start">
-                      {" "}
-                      {`${dog.age} year${dog.age > 1 ? "s" : ""}`}
-                    </p>
-                  </div>
-                  <p className="font-light text-sm text-gray-400 self-end">
-                    {dog.zip_code}
-                  </p>
-                </div>
-              </DogDetailCard>
-            ))}
-          </div>
+          <DogGallery dogs={dogs} />
           <div className="w-full flex justify-center p-4">
             {filters && (
               <button
@@ -162,6 +162,33 @@ export function SearchPage() {
           <button onClick={handleLogout}>Logout</button>
         </div>
       </main>
+      <Modal isOpen={matchModalOpen}>
+        <div className="flex justify-between">
+          <div>
+            <h2 className="text-xl font-semibold">Favorite Dogs</h2>
+            <p className="mt-2 text-gray-600">
+              Feel free to take a look at your favorites once again
+            </p>
+          </div>
+          <button onClick={handleFindMatch}>Find match</button>
+        </div>
+        <div className="mt-4 flex border-t overflow-scroll">
+          {!matchDogId && <DogGallery dogs={favoriteDogs} />}
+          {matchedDogDetail && (
+            <DogDetailCard
+              dog={matchedDogDetail}
+              imageSrc={matchedDogDetail.img}
+              altText={`A ${matchedDogDetail.breed} called ${matchedDogDetail.name}`}
+            />
+          )}
+        </div>
+        <button
+          onClick={() => setMatchModalOpen(false)}
+          className="px-4 py-2 bg-gray-300 rounded-md"
+        >
+          Close
+        </button>
+      </Modal>
     </>
   );
 }

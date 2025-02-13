@@ -2,6 +2,7 @@
 import {
   LocationSearchParams,
   SearchLocation,
+  SearchResponse,
   useLocationSearch,
 } from "@/app/hooks/useLocationSearch.hook";
 import React, { useState, ReactNode, ChangeEvent } from "react";
@@ -41,12 +42,65 @@ const AGE_DROPDOWN_OPTIONS: AgeDropdownOptions[] = [
   { label: "4+", value: { min: 4 }, selected: false },
 ];
 
+const SUGGESTED_LOCATIONS: SearchResponse = {
+  results: [
+    {
+      city: "Angeles",
+      latitude: 18.279531,
+      county: "Utuado",
+      state: "PR",
+      zip_code: "00611",
+      longitude: -66.80217,
+    },
+    {
+      city: "Arecibo",
+      latitude: 18.450674,
+      county: "Arecibo",
+      state: "PR",
+      zip_code: "00612",
+      longitude: -66.698262,
+    },
+    {
+      city: "Bajadero",
+      latitude: 18.444792,
+      county: "Arecibo",
+      state: "PR",
+      zip_code: "00616",
+      longitude: -66.640678,
+    },
+    {
+      city: "Barceloneta",
+      latitude: 18.447092,
+      county: "Barceloneta",
+      state: "PR",
+      zip_code: "00617",
+      longitude: -66.544255,
+    },
+    {
+      city: "Rosario",
+      latitude: 18.113284,
+      county: "San German",
+      state: "PR",
+      zip_code: "00636",
+      longitude: -67.039706,
+    }, 
+    {
+      city: "Dorado",
+      latitude: 18.43606,
+      county: "Dorado",
+      state: "PR",
+      zip_code: "00646",
+      longitude: -66.281954,
+    },
+  ],
+  total: 10000,
+};
+
 export function SearchBar({ breeds, onSearch }: SearchBarProps) {
   const defaultAgeInputValue = "Search by age";
   const [breedInputValue, setBreedInputValue] = useState("");
   const [ageInputValue, setAgeInputValue] = useState(defaultAgeInputValue);
   const [activeInput, setActiveInput] = useState<SearchInputTypes | undefined>();
-  const [suggested] = useState<SearchLocation[]>([]);
   const [locationInputValue, setLocationInputValue] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<SearchLocation>();
   const [breedSelections, setBreedSelections] = useState<string[]>([]);
@@ -261,7 +315,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
             <Dropdown>
               <LocationDropdown
                 isLoading={loading}
-                suggested={suggested}
+                suggested={SUGGESTED_LOCATIONS.results}
                 results={cityResults}
                 onSelection={handleLocationSelection}
               />
