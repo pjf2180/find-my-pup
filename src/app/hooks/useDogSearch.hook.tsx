@@ -16,27 +16,34 @@ export function useDogSearch() {
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
 
-  const searchDogs = async (
+  const search = async (
     params: SearchFilters,
     sortBy: SearchSortBy,
     from?: number
   ) => {
-    const { breeds, age, location } = params;
-    const ageMin = age?.min;
-    const ageMax = age?.max;
-    const sort = `${sortBy.field}:${sortBy.direction}`;
     setLoading(true);
+    if(from === undefined) {
+      setDogs([]);
+    }
+
     try {
-      const zipCodes: string[] = await getZipcodes(location.selection.city);
+      const { breeds, age, location } = params;
+      const ageMin = age?.min;
+      const ageMax = age?.max;
+      const sort = `${sortBy.field}:${sortBy.direction}`;
+      const city: string = location?.selection.city ?? "";
+      const zipCodes: string[] | undefined =
+        city != "" ? await getZipcodes(city) : undefined;
       const dogSearchResponse = await fetchDogIds({
         breeds,
         ageMin,
         ageMax,
         zipCodes,
-        size: 30,
-        from,
+        size: 10,
         sort,
+        from
       });
+ 
       const responseDogDetails: DogDetail[] =
         dogSearchResponse?.resultIds.length > 0
           ? await fetchDogDetails(dogSearchResponse?.resultIds)
@@ -56,7 +63,7 @@ export function useDogSearch() {
 
   return {
     dogs,
-    loadMore: searchDogs,
+    search,
     error,
     loading,
     next,
@@ -91,8 +98,7 @@ interface DogSearchResponse {
   next?: string;
   prev?: string;
 }
-
-async function fetchDogIds(params: {
+interface DogIdFetchParams {
   breeds?: string[];
   zipCodes?: string[];
   ageMin?: number;
@@ -100,8 +106,10 @@ async function fetchDogIds(params: {
   size?: number;
   from?: number;
   sort?: string;
-}): Promise<DogSearchResponse> {
-
+}
+async function fetchDogIds(
+  params: DogIdFetchParams
+): Promise<DogSearchResponse> {
   const queryParams = new URLSearchParams();
 
   if (params.breeds)

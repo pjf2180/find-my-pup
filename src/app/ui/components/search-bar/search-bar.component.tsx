@@ -14,14 +14,16 @@ interface AgeRange {
   min?: number;
   max?: number;
 }
+export type SortByField = "breed" | "name" | "age";
+export type SortDirection = "asc" | "desc";
 export interface SearchSortBy {
-  field: "breed" | "name" | "age";
-  direction: "asc" | "desc";
+  field: SortByField;
+  direction: SortDirection
 }
 export interface SearchFilters {
-  breeds: string[];
+  breeds?: string[];
   age?: AgeRange;
-  location: {
+  location?: {
     selection: SearchLocation;
     locationType: "state" | "city";
   };
@@ -43,16 +45,14 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
   const defaultAgeInputValue = "Search by age";
   const [breedInputValue, setBreedInputValue] = useState("");
   const [ageInputValue, setAgeInputValue] = useState(defaultAgeInputValue);
-  const [activeInput, setActiveInput] = useState<SearchInputTypes | undefined>(
-    "location"
-  );
+  const [activeInput, setActiveInput] = useState<SearchInputTypes | undefined>();
   const [suggested] = useState<SearchLocation[]>([]);
   const [locationInputValue, setLocationInputValue] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<SearchLocation>();
   const [breedSelections, setBreedSelections] = useState<string[]>([]);
   const { data, loading, searchLocations } = useLocationSearch();
   const [ageDropdownState, setAgeDropdownState] = useState<AgeDropdownState>({
-    selectedOption: -1,
+    selectedOption: 0,
     selectedRange: {},
   });
 
@@ -74,11 +74,13 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
     const filters: SearchFilters = {
       age: ageRange,
       breeds: breedSelections,
-      location: {
-        selection: selectedLocation!,
-        locationType: "city",
-      },
     };
+    if (selectedLocation) {
+      filters.location = {
+        selection: selectedLocation,
+        locationType: "city",
+      };
+    }
     onSearch(filters);
     setActiveInput(undefined);
   };
@@ -132,7 +134,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
       : breedInputValue;
 
   return (
-    <div className="flex flex-col p-4 gap-4">
+    <div className="flex flex-col p-4 pb-0 gap-4">
       <div
         className={clsx(
           "flex items-center bg-white rounded-full shadow-md  w-full max-w-3xl border",

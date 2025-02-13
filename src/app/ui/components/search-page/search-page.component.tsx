@@ -4,19 +4,45 @@ import {
   SearchBar,
   SearchFilters,
   SearchSortBy,
+  SortByField,
+  SortDirection,
 } from "../search-bar/search-bar.component";
 import LoginForm from "../login-form/login-form.component";
 import { LOGIN_ENDPOINT, LOGOUT_ENDPOINT } from "@/app/api/api.types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  OptionDropdown,
+  DropdownOption,
+} from "../sortby-dropdown/sortby-dropdown.component";
+import { DogDetailCard } from "../dog-detail-card/dog-detail-card.component";
 
+const SORT_OPTIONS: DropdownOption[] = [
+  { name: "breed", value: "breed" },
+  { name: "age", value: "age" },
+  { name: "name", value: "name" },
+];
+const SORT_DIRECTION_OPTIONS: DropdownOption[] = [
+  { name: "ascending", value: "asc" },
+  { name: "descending", value: "desc" },
+];
 export function SearchPage() {
-  const [filters, setFilters] = useState<SearchFilters>();
-  const [sortBy] = useState<SearchSortBy>({
+  const [filters, setFilters] = useState<SearchFilters>({});
+  const [sortBy, setSortBy] = useState<SearchSortBy>({
     field: "breed",
-    direction: "desc",
+    direction: "asc",
   });
 
-  const { dogs, loading, total, next, loadMore } = useDogSearch();
+  const { dogs, total, next, search } = useDogSearch();
+
+  useEffect(() => {
+    search(
+      {},
+      {
+        field: "breed",
+        direction: "asc",
+      }
+    );
+  }, []);
 
   const handleSubmit = async (credentials: {
     username: string;
@@ -35,44 +61,107 @@ export function SearchPage() {
     console.log("Age: ", searchData.age);
     console.log("Location: ", searchData.location);
     setFilters(searchData);
-    loadMore(searchData, sortBy);
+    search(searchData, sortBy);
   };
 
   const handleLoadMore = () => {
-    loadMore(filters!, sortBy, next);
+    search(filters, sortBy, next);
+  };
+
+  const handleSortByChange = (optionValue: string) => {
+    const updatedSortBy: SearchSortBy = {
+      field: optionValue as SortByField,
+      direction: "asc",
+    };
+    setSortBy(updatedSortBy);
+    search(filters, updatedSortBy);
+  };
+
+  const handleSortDirectionChange = (optionValue: string) => {
+    const updatedSortBy: SearchSortBy = {
+      field: sortBy.field,
+      direction: optionValue as SortDirection,
+    };
+    setSortBy(updatedSortBy);
+    search(filters, updatedSortBy);
   };
 
   return (
     <>
-      <header className="sticky top-0 flex justify-center bg-amber-50">
+      <header className="sticky top-0 z-10 flex flex-col items-center justify-center bg-white shadow-md">
         <SearchBar breeds={DOG_BREEDS} onSearch={handleOnSearch} />
-      </header>
-      <main className="overflow-scroll bg-green-100">
-        {loading && <p>Loading...</p>}
-        <p>{total} results</p>
-        <div className="flex flex-col gap-2">
-          {dogs?.map((dog) => (
-            <div key={dog.id} className="border rounded-md p-2">
-              <p className="font-bold">{dog.name}</p>
-              <p>{dog.breed}</p>
+        {dogs.length > 0 && (
+          <div className="w-full flex flex-row justify-between items-center px-6 border-b border-t">
+            <p>{total} results</p>
+            <div className="flex flew-row">
+              <div className="">
+                <p>Sort by</p>
+                <OptionDropdown
+                  value={sortBy.field}
+                  options={SORT_OPTIONS}
+                  onChange={handleSortByChange}
+                />
+              </div>
+              <div>
+                <p>Direction</p>
+                <OptionDropdown
+                  value={sortBy.direction}
+                  options={SORT_DIRECTION_OPTIONS}
+                  onChange={handleSortDirectionChange}
+                />
+              </div>
             </div>
-          ))}
+
+            {/* {error && <p>Error loading dogs</p>}
+          {loading && <p>Loading...</p>} */}
+          </div>
+        )}
+      </header>
+      
+      <main className="overflow-scroll flex flex-col items-center pt-4 bg-gray-200 h-screen">
+        <div className="container">
+          <div className="grid gap-4 justify-center md:grid-cols-[320px_320px] lg:grid-cols-[320px_320px_320px] ">
+            {dogs?.map((dog) => (
+              <DogDetailCard
+                key={dog.id}
+                imageSrc={dog.img}
+                altText={`A ${dog.breed} called ${dog.name}`}
+              >
+                <div className="h-full flex flex-col items-center  p-4 justify-between">
+                  <div className="self-start flex flex-col gap-1">
+                    {" "}
+                    <p className="font-bold text-xl self-start">{dog.name}</p>
+                    <p className="font-semibold text-sm text-gray-400 self-start">
+                      {dog.breed}
+                    </p>
+                    <p className="font-normal text-sm text-gray-400 self-start">
+                      {" "}
+                      {`${dog.age} year${dog.age > 1 ? "s" : ""}`}
+                    </p>
+                  </div>
+                  <p className="font-light text-sm text-gray-400 self-end">
+                    {dog.zip_code}
+                  </p>
+                </div>
+              </DogDetailCard>
+            ))}
+          </div>
+          <div className="w-full flex justify-center p-4">
+            {filters && (
+              <button
+                className="bg-black text-white p-4"
+                onClick={handleLoadMore}
+              >
+                Load More
+              </button>
+            )}
+          </div>
         </div>
-        <div>
-          {filters && (
-            <button
-              className="bg-black text-white p-4"
-              onClick={handleLoadMore}
-            >
-              Load More
-            </button>
-          )}
+        <div className="fixed bottom-0 right-0 bg-blue-100 h-[300px] w-[300px]">
+          <LoginForm onSubmit={handleSubmit} />
+          <button onClick={handleLogout}>Logout</button>
         </div>
       </main>
-      <div className="fixed bottom-0 right-0 bg-blue-100 h-[300px] w-[300px]">
-        <LoginForm onSubmit={handleSubmit} />
-        <button onClick={handleLogout}>Logout</button>
-      </div>
     </>
   );
 }
