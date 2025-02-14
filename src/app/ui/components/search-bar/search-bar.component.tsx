@@ -5,21 +5,26 @@ import {
   SearchResponse,
   useLocationSearch,
 } from "@/app/hooks/useLocationSearch.hook";
-import React, { useState, ReactNode, ChangeEvent } from "react";
+import React, { useState, ReactNode, ChangeEvent, useRef } from "react";
 import { FaSearch } from "react-icons/fa";
 import { BreedFilter } from "../breed-filter/breed-filter.component";
 import clsx from "clsx";
+import { useClickOutside } from "../../hooks/useClickOutside";
+import {
+  AgeFilter,
+  AgeDropdownOptions,
+  AgeDropdownState,
+  AgeRange,
+} from "../age-filter/age-filter.component";
+import { LocationFilter } from "../location-filter/location-filter.component";
 
 type SearchInputTypes = "breed" | "age" | "location";
-interface AgeRange {
-  min?: number;
-  max?: number;
-}
+
 export type SortByField = "breed" | "name" | "age";
 export type SortDirection = "asc" | "desc";
 export interface SearchSortBy {
   field: SortByField;
-  direction: SortDirection
+  direction: SortDirection;
 }
 export interface SearchFilters {
   breeds?: string[];
@@ -35,72 +40,13 @@ export interface SearchBarProps {
   onSearch: (filters: SearchFilters) => void;
 }
 
-const AGE_DROPDOWN_OPTIONS: AgeDropdownOptions[] = [
-  { label: "Any age", selected: true },
-  { label: "Puppy", value: { max: 2 }, selected: false },
-  { label: "2+", value: { min: 2 }, selected: false },
-  { label: "4+", value: { min: 4 }, selected: false },
-];
-
-const SUGGESTED_LOCATIONS: SearchResponse = {
-  results: [
-    {
-      city: "Angeles",
-      latitude: 18.279531,
-      county: "Utuado",
-      state: "PR",
-      zip_code: "00611",
-      longitude: -66.80217,
-    },
-    {
-      city: "Arecibo",
-      latitude: 18.450674,
-      county: "Arecibo",
-      state: "PR",
-      zip_code: "00612",
-      longitude: -66.698262,
-    },
-    {
-      city: "Bajadero",
-      latitude: 18.444792,
-      county: "Arecibo",
-      state: "PR",
-      zip_code: "00616",
-      longitude: -66.640678,
-    },
-    {
-      city: "Barceloneta",
-      latitude: 18.447092,
-      county: "Barceloneta",
-      state: "PR",
-      zip_code: "00617",
-      longitude: -66.544255,
-    },
-    {
-      city: "Rosario",
-      latitude: 18.113284,
-      county: "San German",
-      state: "PR",
-      zip_code: "00636",
-      longitude: -67.039706,
-    }, 
-    {
-      city: "Dorado",
-      latitude: 18.43606,
-      county: "Dorado",
-      state: "PR",
-      zip_code: "00646",
-      longitude: -66.281954,
-    },
-  ],
-  total: 10000,
-};
-
 export function SearchBar({ breeds, onSearch }: SearchBarProps) {
   const defaultAgeInputValue = "Search by age";
   const [breedInputValue, setBreedInputValue] = useState("");
   const [ageInputValue, setAgeInputValue] = useState(defaultAgeInputValue);
-  const [activeInput, setActiveInput] = useState<SearchInputTypes | undefined>();
+  const [activeInput, setActiveInput] = useState<
+    SearchInputTypes | undefined
+  >();
   const [locationInputValue, setLocationInputValue] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<SearchLocation>();
   const [breedSelections, setBreedSelections] = useState<string[]>([]);
@@ -188,7 +134,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
       : breedInputValue;
 
   return (
-    <div className="flex flex-col p-4 pb-0 gap-4">
+    <div className="flex flex-col p-4 gap-4">
       <div
         className={clsx(
           "flex items-center bg-white rounded-full shadow-md  w-full max-w-3xl border",
@@ -217,7 +163,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
               )}
               value={breedInputDisplayValue}
               onChange={handleBreedInputChange}
-              onFocus={() => setActiveInput("breed")}
+              onClick={() => setActiveInput("breed")}
             ></input>
           </div>
           {/* Divider */}
@@ -272,7 +218,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
                 )}
                 value={locationInputValue}
                 onChange={handleLocationTextInputChange}
-                onFocus={() => setActiveInput("location")}
+                onClick={() => setActiveInput("location")}
               />
             </span>
           </div>
@@ -284,10 +230,12 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
           </button>
         </div>
       </div>
+
+      {/* Dropdowns */}
       <div className="bg-slate-200 relative">
         {activeInput === "breed" && (
           <div className="absolute top-full left-0">
-            <Dropdown>
+            <Dropdown onDismiss={() => setActiveInput(undefined)}>
               <BreedFilter
                 breadSearchText={breedInputValue}
                 breeds={breeds}
@@ -301,8 +249,8 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
         )}
         {activeInput === "age" && (
           <div className="absolute top-full left-1/2 -translate-x-1/2">
-            <Dropdown>
-              <AgeDropdown
+            <Dropdown onDismiss={() => setActiveInput(undefined)}>
+              <AgeFilter
                 state={ageDropdownState}
                 options={AGE_DROPDOWN_OPTIONS}
                 onChange={handleAgeDropdownChange}
@@ -312,8 +260,8 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
         )}
         {activeInput === "location" && (
           <div className="absolute top-full right-0">
-            <Dropdown>
-              <LocationDropdown
+            <Dropdown onDismiss={() => setActiveInput(undefined)}>
+              <LocationFilter
                 isLoading={loading}
                 suggested={SUGGESTED_LOCATIONS.results}
                 results={cityResults}
@@ -327,180 +275,82 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
   );
 }
 
-function Dropdown({ children }: { children: ReactNode }) {
+function Dropdown({
+  onDismiss,
+  children,
+}: {
+  onDismiss: () => void;
+  children: ReactNode;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  useClickOutside(containerRef, onDismiss);
   return (
-    <div className="rounded-[32px] w-[600px] h-[500px] px-6  bg-white">
+    <div
+      ref={containerRef}
+      className="rounded-[32px] w-[600px] h-[500px] px-6 shadow-lg bg-white"
+    >
       {children}
     </div>
   );
 }
 
-type AgeDropdownOptions = {
-  label: string;
-  value?: AgeRange;
-  selected: boolean;
+const SUGGESTED_LOCATIONS: SearchResponse = {
+  results: [
+    {
+      city: "Angeles",
+      latitude: 18.279531,
+      county: "Utuado",
+      state: "PR",
+      zip_code: "00611",
+      longitude: -66.80217,
+    },
+    {
+      city: "Arecibo",
+      latitude: 18.450674,
+      county: "Arecibo",
+      state: "PR",
+      zip_code: "00612",
+      longitude: -66.698262,
+    },
+    {
+      city: "Bajadero",
+      latitude: 18.444792,
+      county: "Arecibo",
+      state: "PR",
+      zip_code: "00616",
+      longitude: -66.640678,
+    },
+    {
+      city: "Barceloneta",
+      latitude: 18.447092,
+      county: "Barceloneta",
+      state: "PR",
+      zip_code: "00617",
+      longitude: -66.544255,
+    },
+    {
+      city: "Rosario",
+      latitude: 18.113284,
+      county: "San German",
+      state: "PR",
+      zip_code: "00636",
+      longitude: -67.039706,
+    },
+    {
+      city: "Dorado",
+      latitude: 18.43606,
+      county: "Dorado",
+      state: "PR",
+      zip_code: "00646",
+      longitude: -66.281954,
+    },
+  ],
+  total: 10000,
 };
 
-interface AgeDropdownState {
-  selectedOption: number;
-  selectedRange: { min?: number; max?: number };
-}
-
-export interface AgeDropdownProps {
-  options: AgeDropdownOptions[];
-  state: AgeDropdownState;
-  onChange: (dropdownState: AgeDropdownState) => void;
-}
-
-export function AgeDropdown({ options, state, onChange }: AgeDropdownProps) {
-  const minAge = state.selectedRange?.min;
-  const maxAge = state.selectedRange?.max;
-
-  const [error, setError] = useState<string | null>(null);
-  //const [selectedOptionIdx, setSelectedOptionIdx] = useState<number>(-1);
-  const selectedOptionIdx = state.selectedOption;
-  const handleMinAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value ? parseInt(e.target.value, 10) : undefined;
-
-    const validForm = formValid(value, maxAge);
-    if (validForm) {
-      onChange({
-        ...state,
-        selectedRange: { min: value, max: maxAge as number },
-      });
-    }
-  };
-
-  const handleMaxAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value ? parseInt(e.target.value, 10) : undefined;
-    const validForm = formValid(minAge, value);
-    if (validForm) {
-      onChange({
-        ...state,
-        selectedRange: { min: minAge as number, max: value as number },
-      });
-    }
-  };
-
-  const handleOptionClick = (idx: number) => {
-    const newState: AgeDropdownState = {
-      ...state,
-      selectedOption: idx,
-    };
-    onChange(newState);
-  };
-
-  const formValid = (min: number | undefined, max: number | undefined) => {
-    if (min !== undefined && max !== undefined && min >= max) {
-      setError("Minimum age must be less than maximum age");
-      return false;
-    } else {
-      setError(null);
-      console.log(min, max);
-
-      return true;
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-2 pt-6">
-      <div className="flex gap-2 mb-6">
-        {options.map((option, index) => (
-          <button
-            key={index}
-            className={`px-4 py-2 border rounded-full text-sm font-normal whitespace-nowrap 
-            ${
-              index == selectedOptionIdx
-                ? "border-black bg-gray-100"
-                : "border-gray-300 bg-white text-gray-700"
-            }
-          `}
-            onClick={() => handleOptionClick(index)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
-      <p className="font-bold mb-4">Custom range</p>
-
-      <div className="flex flex-col">
-        <label className="text-sm font-semibold">Min Age</label>
-        <input
-          type="number"
-          value={minAge ?? ""}
-          onChange={handleMinAgeChange}
-          className="border p-1 rounded"
-        />
-      </div>
-
-      <div className="flex flex-col">
-        <label className="text-sm font-semibold">Max Age</label>
-        <input
-          type="number"
-          value={maxAge ?? ""}
-          onChange={handleMaxAgeChange}
-          className="border p-1 rounded"
-        />
-      </div>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-
-      <button>Next</button>
-    </div>
-  );
-}
-
-export interface LocationDropdownProps {
-  suggested: SearchLocation[];
-  results: SearchLocation[];
-  isLoading: boolean;
-  onSelection: (selection: SearchLocation) => void;
-}
-export function LocationDropdown({
-  suggested,
-  results,
-  isLoading,
-  onSelection,
-}: LocationDropdownProps) {
-  const renderItem = (i: SearchLocation) => {
-    return (
-      <div
-        key={i.zip_code}
-        className="flex flex-row p-4 items-center cursor-pointer rounded-md hover:bg-slate-50"
-        onClick={() => onSelection(i)}
-      >
-        <div className="mr-6 bg-blue-200 h-20 w-20 rounded-md"></div>
-        <div className="flex-col ">
-          <p className="font-semibold">
-            {i.city}, {i.state}
-          </p>
-          <p className=" text-sm text-gray-400">10 miles away</p>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="h-full overflow-scroll ">
-      {isLoading && <p>Loading...</p>}
-
-      {!isLoading && suggested.length > 0 && (
-        <>
-          <p className="text-sm font-light text-gray-400">
-            Suggested destinations
-          </p>
-          {suggested.map((x) => renderItem(x))}
-        </>
-      )}
-      {!isLoading && results.length > 0 && (
-        <>
-          <p className="text-sm font-light text-gray-400 pt-6 px-4">
-            Search Results
-          </p>
-          {results.map((x) => renderItem(x))}
-        </>
-      )}
-    </div>
-  );
-}
+const AGE_DROPDOWN_OPTIONS: AgeDropdownOptions[] = [
+  { label: "Any age", selected: true },
+  { label: "Puppy", value: { max: 2 }, selected: false },
+  { label: "2+", value: { min: 2 }, selected: false },
+  { label: "4+", value: { min: 4 }, selected: false },
+];

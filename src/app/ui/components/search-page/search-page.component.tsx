@@ -36,7 +36,7 @@ export function SearchPage() {
     field: "breed",
     direction: "asc",
   });
-  const { dogs, total, next, search } = useDogSearch();
+  const { dogs, total, next, search, loading } = useDogSearch();
   const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [matchDogId, setMatchDog] = useState<string>();
   const { favorites } = useContext(FavoritesContext);
@@ -143,11 +143,11 @@ export function SearchPage() {
         )}
       </header>
 
-      <main className="overflow-scroll flex flex-col items-center pt-4 bg-gray-200 h-screen">
+      <main className="flex flex-col items-center pt-4 min-h-screen">
         <div className="container">
           <DogGallery dogs={dogs} />
           <div className="w-full flex justify-center p-4">
-            {filters && (
+            {!loading && !!next && (
               <button
                 className="bg-black text-white p-4"
                 onClick={handleLoadMore}
@@ -157,37 +157,36 @@ export function SearchPage() {
             )}
           </div>
         </div>
+        {/* Remove */}
         <div className="fixed bottom-0 right-0 bg-blue-100 h-[300px] w-[300px]">
           <LoginForm onSubmit={handleSubmit} />
           <button onClick={handleLogout}>Logout</button>
         </div>
       </main>
-      <Modal isOpen={matchModalOpen}>
-        <div className="flex justify-between">
-          <div>
-            <h2 className="text-xl font-semibold">Favorite Dogs</h2>
-            <p className="mt-2 text-gray-600">
-              Feel free to take a look at your favorites once again
-            </p>
+      <Modal isOpen={matchModalOpen} onClose={() => setMatchModalOpen(false)}>
+        <div className="flex flex-col h-full">
+          <div className="flex justify-between border-b pb-4 drop-shadow-2xl">
+            <div>
+              <h2 className="text-xl font-semibold">Favorite Dogs</h2>
+              <p className="mt-2 text-gray-600">
+                Feel free to take a look at your favorites once again
+              </p>
+            </div>
+            <button onClick={handleFindMatch}>Find match</button>
           </div>
-          <button onClick={handleFindMatch}>Find match</button>
+
+          <div className="py-4 overflow-hidden overflow-y-scroll">
+            {!matchDogId && <DogGallery dogs={favoriteDogs} />}
+            {matchedDogDetail && (
+              <DogDetailCard
+                dog={matchedDogDetail}
+                imageSrc={matchedDogDetail.img}
+                altText={`A ${matchedDogDetail.breed} called ${matchedDogDetail.name}`}
+              />
+            )}
+          </div>
         </div>
-        <div className="mt-4 flex border-t overflow-scroll">
-          {!matchDogId && <DogGallery dogs={favoriteDogs} />}
-          {matchedDogDetail && (
-            <DogDetailCard
-              dog={matchedDogDetail}
-              imageSrc={matchedDogDetail.img}
-              altText={`A ${matchedDogDetail.breed} called ${matchedDogDetail.name}`}
-            />
-          )}
-        </div>
-        <button
-          onClick={() => setMatchModalOpen(false)}
-          className="px-4 py-2 bg-gray-300 rounded-md"
-        >
-          Close
-        </button>
+
       </Modal>
     </>
   );

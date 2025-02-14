@@ -15,16 +15,16 @@ export function DogDetailCard({
   dog,
   imageSrc,
   altText = "",
-  children,
+  
 }: CardProps) {
   const { set, favorites } = useContext(FavoritesContext);
 
   const dogIsActive: boolean = favorites[dog.id] != undefined;
 
   return (
-    <div className="relative w-80 h-96 bg-white shadow-lg rounded-xl overflow-hidden flex flex-col">
+    <div className="relative w-80 h-96 bg-white  overflow-hidden flex flex-col">
       {/* Image "Window" */}
-      <div className="relative w-full h-[65%] overflow-hidden">
+      <div className="relative w-full h-[65%] rounded-xl overflow-hidden">
         <Image
           src={imageSrc}
           alt={altText}
@@ -46,7 +46,24 @@ export function DogDetailCard({
       </div>
 
       {/* Content Section (Fixed Height) */}
-      <div className="h-[35%]">{children}</div>
+      <div className="h-[35%]">
+        <div className="h-full flex flex-col items-center  p-4 justify-between">
+          <div className="self-start flex flex-col gap-1">
+            {" "}
+            <p className="font-bold text-xl self-start">{dog.name}</p>
+            <p className="font-semibold text-sm text-gray-400 self-start">
+              {dog.breed}
+            </p>
+            <p className="font-normal text-sm text-gray-400 self-start">
+              {" "}
+              {`${dog.age} year${dog.age > 1 ? "s" : ""}`}
+            </p>
+          </div>
+          <p className="font-light text-sm text-gray-400 self-end">
+            {dog.zip_code}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
