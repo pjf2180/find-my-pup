@@ -37,7 +37,7 @@ export function LocationFilter({
     );
   }
   return (
-    <div className="h-full overflow-scroll ">
+    <div className="h-full overflow-scroll pt-6 px-4">
       {suggested.length > 0 && results.length === 0 && (
         <>
           <p className="text-sm font-light text-gray-400">
@@ -48,7 +48,7 @@ export function LocationFilter({
       )}
       {results.length > 0 && (
         <>
-          <p className="text-sm font-light text-gray-400 pt-6 px-4">
+          <p className="text-sm font-light text-gray-400 ">
             Search Results
           </p>
           {results.map((x) => renderItem(x))}

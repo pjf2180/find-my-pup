@@ -63,7 +63,8 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
     selectedOption: 0,
     selectedRange: {},
   });
-
+  const containerRef = useRef<HTMLDivElement>(null);
+  useClickOutside(containerRef, ()=> setActiveInput(undefined));
   const handleLocationTextInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setLocationInputValue(e.target.value);
   };
@@ -140,7 +141,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
       : breedInputValue;
 
   return (
-    <div className="flex flex-col p-4 gap-4">
+    <div ref={containerRef} className="flex flex-col p-4 gap-4">
       <div
         className={clsx(
           "flex items-center bg-white rounded-full shadow-md  w-full max-w-3xl border",
@@ -241,7 +242,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
       <div className="bg-slate-200 relative">
         {activeInput === "breed" && (
           <div className="absolute top-full left-0">
-            <Dropdown onDismiss={() => setActiveInput(undefined)}>
+            <Dropdown >
               <BreedFilter
                 breadSearchText={breedInputValue}
                 breeds={breeds}
@@ -255,7 +256,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
         )}
         {activeInput === "age" && (
           <div className="absolute top-full left-1/2 -translate-x-1/2">
-            <Dropdown onDismiss={() => setActiveInput(undefined)}>
+            <Dropdown >
               <AgeFilter
                 state={ageDropdownState}
                 options={AGE_DROPDOWN_OPTIONS}
@@ -266,11 +267,13 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
         )}
         {activeInput === "location" && (
           <div className="absolute top-full right-0">
-            <Dropdown onDismiss={() => setActiveInput(undefined)}>
+            <Dropdown >
               <LocationFilter
                 isLoading={loading}
-                suggested={locationInputValue == "" ? SUGGESTED_LOCATIONS.results : []}
-                results={locationInputValue !== "" ? cityResults: []}
+                suggested={
+                  locationInputValue == "" ? SUGGESTED_LOCATIONS.results : []
+                }
+                results={locationInputValue !== "" ? cityResults : []}
                 onSelection={handleLocationSelection}
               />
             </Dropdown>
@@ -281,20 +284,9 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
   );
 }
 
-function Dropdown({
-  onDismiss,
-  children,
-}: {
-  onDismiss: () => void;
-  children: ReactNode;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  useClickOutside(containerRef, onDismiss);
+function Dropdown({ children }: { children: ReactNode }) {
   return (
-    <div
-      ref={containerRef}
-      className="rounded-[32px] w-[600px] h-[500px] px-6 shadow-lg bg-white"
-    >
+    <div className="rounded-[32px] w-[600px] h-[500px] px-6 shadow-lg bg-white">
       {children}
     </div>
   );
