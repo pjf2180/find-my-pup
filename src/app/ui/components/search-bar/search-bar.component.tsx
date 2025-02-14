@@ -17,6 +17,7 @@ import {
   AgeRange,
 } from "../age-filter/age-filter.component";
 import { LocationFilter } from "../location-filter/location-filter.component";
+import { useDebouncedState } from "@/app/hooks/useDebouncedState";
 
 type SearchInputTypes = "breed" | "age" | "location";
 
@@ -47,7 +48,14 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
   const [activeInput, setActiveInput] = useState<
     SearchInputTypes | undefined
   >();
-  const [locationInputValue, setLocationInputValue] = useState("");
+  const [locationInputValue, setLocationInputValue] = useDebouncedState(
+    "",
+    300,
+    (city: string) => {
+      const params: LocationSearchParams = { city };
+      searchLocations(params);
+    }
+  );
   const [selectedLocation, setSelectedLocation] = useState<SearchLocation>();
   const [breedSelections, setBreedSelections] = useState<string[]>([]);
   const { data, loading, searchLocations } = useLocationSearch();
@@ -58,8 +66,6 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
 
   const handleLocationTextInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setLocationInputValue(e.target.value);
-    const params: LocationSearchParams = { city: e.target.value };
-    searchLocations(params);
   };
 
   const handleLocationSelection = (selection: SearchLocation) => {
@@ -263,8 +269,8 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
             <Dropdown onDismiss={() => setActiveInput(undefined)}>
               <LocationFilter
                 isLoading={loading}
-                suggested={SUGGESTED_LOCATIONS.results}
-                results={cityResults}
+                suggested={locationInputValue == "" ? SUGGESTED_LOCATIONS.results : []}
+                results={locationInputValue !== "" ? cityResults: []}
                 onSelection={handleLocationSelection}
               />
             </Dropdown>

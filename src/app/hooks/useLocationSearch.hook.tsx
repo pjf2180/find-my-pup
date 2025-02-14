@@ -48,12 +48,6 @@ export const useLocationSearch = () => {
 
     try {
       const result: SearchResponse = await fetchLocations(params);
-
-      await new Promise((res) => {
-        setTimeout(() => {
-          res(undefined);
-        }, 400);
-      });
       setData(result);
     } catch (err) {
       setError(

@@ -29,12 +29,16 @@ export function LocationFilter({
       </div>
     );
   };
-
+  if (isLoading) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center ">
+        <p>Loading</p>
+      </div>
+    );
+  }
   return (
     <div className="h-full overflow-scroll ">
-      {isLoading && <p>Loading...</p>}
-
-      {!isLoading && suggested.length > 0 && (
+      {suggested.length > 0 && results.length === 0 && (
         <>
           <p className="text-sm font-light text-gray-400">
             Suggested destinations
@@ -42,7 +46,7 @@ export function LocationFilter({
           {suggested.map((x) => renderItem(x))}
         </>
       )}
-      {!isLoading && results.length > 0 && (
+      {results.length > 0 && (
         <>
           <p className="text-sm font-light text-gray-400 pt-6 px-4">
             Search Results
