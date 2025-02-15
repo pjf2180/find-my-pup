@@ -7,8 +7,6 @@ import {
   SortByField,
   SortDirection,
 } from "../search-bar/search-bar.component";
-import LoginForm from "../login-form/login-form.component";
-import { LOGIN_ENDPOINT, LOGOUT_ENDPOINT } from "@/app/api/api.types";
 import { useContext, useEffect, useState } from "react";
 import {
   OptionDropdown,
@@ -52,18 +50,6 @@ export function SearchPage() {
       }
     );
   }, []);
-
-  const handleSubmit = async (credentials: {
-    username: string;
-    password: string;
-  }) => {
-    console.log("Credentials: ", credentials);
-    await login(credentials.password, credentials.username);
-  };
-
-  const handleLogout = async () => {
-    await logout();
-  };
 
   const handleOnSearch = (searchData: SearchFilters) => {
     console.log("Breeds: ", searchData.breeds);
@@ -157,11 +143,6 @@ export function SearchPage() {
             )}
           </div>
         </div>
-        {/* Remove */}
-        <div className="fixed bottom-0 right-0 bg-blue-100 h-[300px] w-[300px]">
-          <LoginForm onSubmit={handleSubmit} />
-          <button onClick={handleLogout}>Logout</button>
-        </div>
       </main>
       <Modal isOpen={matchModalOpen} onClose={() => setMatchModalOpen(false)}>
         <div className="flex flex-col h-full">
@@ -189,46 +170,6 @@ export function SearchPage() {
       </Modal>
     </>
   );
-}
-
-async function login(name: string, email: string): Promise<Response> {
-  try {
-    const response = await fetch(LOGIN_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ name, email }),
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    return response;
-  } catch (error) {
-    console.error("Login failed:", error);
-    throw error;
-  }
-}
-
-async function logout(): Promise<Response> {
-  try {
-    const response = await fetch(LOGOUT_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    return response;
-  } catch (error) {
-    console.error("Logout failed:", error);
-    throw error;
-  }
 }
 
 const DOG_BREEDS = [
