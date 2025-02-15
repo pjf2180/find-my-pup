@@ -9,3 +9,4 @@ export const DOG_DETAILS = `${BASE_URL}/dogs`;
 export const DOG_MATCH = `${BASE_URL}/dogs/match`;
 
 export const LOCATIONS_SEARCH = `${BASE_URL}/locations/search`;
+export const LOCATIONS = `${BASE_URL}/locations`;

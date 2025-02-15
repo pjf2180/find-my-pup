@@ -6,9 +6,11 @@ import {
 import {
   fetchLocations,
   LocationSearchParams,
+  SearchLocation,
   SearchResponse,
 } from "./useLocationSearch.hook";
 import { DOG_DETAILS, DOG_SEARCH } from "../api/api.types";
+import { getLocationsByZipcode } from "../api/endpoints/locations/locations.endpoint";
 
 export function useDogSearch() {
   const [latestResponse, setLatestResponse] = useState<DogSearchResponse>();
@@ -22,7 +24,7 @@ export function useDogSearch() {
     from?: number
   ) => {
     setLoading(true);
-    if(from === undefined) {
+    if (from === undefined) {
       setDogs([]);
     }
 
@@ -41,14 +43,28 @@ export function useDogSearch() {
         zipCodes,
         size: 10,
         sort,
-        from
+        from,
       });
- 
-      const responseDogDetails: DogDetail[] =
+
+      const responseDogDetails: DogDetailResponse[] =
         dogSearchResponse?.resultIds.length > 0
           ? await fetchDogDetails(dogSearchResponse?.resultIds)
           : [];
-      setDogs((d) => [...d, ...responseDogDetails]);
+      const dogLocations = await getLocationsByZipcode(
+        responseDogDetails.map((x) => x.zip_code)
+      );
+      const dogLocationsByZipCode = dogLocations.reduce(
+        (acc: { [zip: string]: SearchLocation }, current) => {
+          acc[current.zip_code] = current;
+          return acc;
+        },
+        {}
+      );
+      const dogDetails: DogDetail[] = responseDogDetails.map((rd) => ({
+        ...rd,
+        location: dogLocationsByZipCode[rd.zip_code],
+      }));
+      setDogs((d) => [...d, ...dogDetails]);
       setLatestResponse(dogSearchResponse);
       setError(undefined);
     } catch (error: unknown) {
@@ -146,7 +162,7 @@ async function fetchDogIds(
   }
 }
 
-export interface DogDetail {
+export interface DogDetailResponse {
   img: string;
   name: string;
   age: number;
@@ -155,7 +171,9 @@ export interface DogDetail {
   id: string;
 }
 
-async function fetchDogDetails(ids: string[]): Promise<DogDetail[]> {
+export type DogDetail = DogDetailResponse & { location: SearchLocation };
+
+async function fetchDogDetails(ids: string[]): Promise<DogDetailResponse[]> {
   try {
     const response = await fetch(DOG_DETAILS, {
       method: "POST",

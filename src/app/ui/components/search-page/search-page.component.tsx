@@ -186,7 +186,6 @@ export function SearchPage() {
             )}
           </div>
         </div>
-
       </Modal>
     </>
   );

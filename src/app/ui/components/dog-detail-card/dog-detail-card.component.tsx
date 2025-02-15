@@ -11,12 +11,7 @@ type CardProps = {
   children?: React.ReactNode;
 };
 
-export function DogDetailCard({
-  dog,
-  imageSrc,
-  altText = "",
-  
-}: CardProps) {
+export function DogDetailCard({ dog, imageSrc, altText = "" }: CardProps) {
   const { set, favorites } = useContext(FavoritesContext);
 
   const dogIsActive: boolean = favorites[dog.id] != undefined;
@@ -59,8 +54,8 @@ export function DogDetailCard({
               {`${dog.age} year${dog.age > 1 ? "s" : ""}`}
             </p>
           </div>
-          <p className="font-light text-sm text-gray-400 self-end">
-            {dog.zip_code}
+          <p className="font-medium text-sm text-gray-500 self-end">
+            {`${dog.location.city}, ${dog.location.state} ${dog.zip_code}`}
           </p>
         </div>
       </div>
