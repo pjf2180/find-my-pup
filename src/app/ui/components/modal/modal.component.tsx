@@ -26,7 +26,7 @@ export default function Modal({
           }}
         ></div>
         <div
-          className="z-30 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-2xl shadow-xl container h-[700px]"
+          className="z-30 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white overflow-hidden rounded-2xl shadow-xl container h-[700px]"
         >
           {children}
         </div>

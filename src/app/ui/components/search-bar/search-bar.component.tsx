@@ -155,7 +155,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
       : breedInputValue;
 
   return (
-    <div className="flex flex-col  gap-4 bg-red-200">
+    <div className="flex flex-col pt-4 gap-4 ">
       <SearchBarBase
         ref={containerRef}
         activeOptionIdx={optionToIdx(activeInput)}
@@ -221,7 +221,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
             </span>
           </div>
           <button
-            className="ml-4 bg-red-500 rounded-full p-3 text-white"
+            className="ml-4 hover:bg-[#f9af4f]  bg-[rgba(247,162,50)] rounded-full p-3 text-white"
             onClick={handleSearchClick}
           >
             <FaSearch />

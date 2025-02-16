@@ -18,7 +18,7 @@ export function OptionDropdown({
 }: DropdownProps) {
   return (
     <select
-      className="p-2 border rounded-lg shadow-sm focus:ring focus:ring-blue-300"
+      className="p-2 border rounded-lg shadow-sm cursor-pointer focus:ring focus:ring-blue-300 text-gray-400"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     >

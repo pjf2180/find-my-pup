@@ -19,13 +19,13 @@ import { DogMatch } from "@/app/api/endpoints/dogs/dog-match.endpoint";
 import { DogDetailCard } from "../dog-detail-card/dog-detail-card.component";
 
 const SORT_OPTIONS: DropdownOption[] = [
-  { name: "breed", value: "breed" },
-  { name: "age", value: "age" },
-  { name: "name", value: "name" },
+  { name: "Breed", value: "breed" },
+  { name: "Age", value: "age" },
+  { name: "Name", value: "name" },
 ];
 const SORT_DIRECTION_OPTIONS: DropdownOption[] = [
-  { name: "ascending", value: "asc" },
-  { name: "descending", value: "desc" },
+  { name: "Ascending", value: "asc" },
+  { name: "Descending", value: "desc" },
 ];
 
 export function SearchPage() {
@@ -95,26 +95,22 @@ export function SearchPage() {
 
   return (
     <>
-      <header className="sticky top-0 w-full z-10 flex flex-col items-center justify-center bg-white shadow-md">
+      <header className="sticky top-0 w-full z-10 flex flex-col items-center justify-center bg-[rgba(19,10,33)] shadow-md">
         <SearchBar breeds={DOG_BREEDS} onSearch={handleOnSearch} />
         {dogs.length > 0 && (
-          <div className="w-full flex flex-row justify-between items-center px-6 border-b border-t">
-            <p>{total} results</p>
-
-            <button onClick={openModal}>See Favorites</button>
-
+          <div className="w-full flex flex-row justify-between items-center py-5 px-5 text-[rgba(247,162,50)] border-[rgba(247,162,50)] border-t">
             {/* {Sorting} */}
             <div className="flex flew-row">
-              <div className="">
-                <p>Sort by</p>
+              <div className="mr-4 cursor-pointer">
+                <p className="font-semibold pb-2">Sort By</p>
                 <OptionDropdown
                   value={sortBy.field}
                   options={SORT_OPTIONS}
                   onChange={handleSortByChange}
                 />
               </div>
-              <div>
-                <p>Direction</p>
+              <div >
+                <p className="font-semibold pb-2">Direction</p>
                 <OptionDropdown
                   value={sortBy.direction}
                   options={SORT_DIRECTION_OPTIONS}
@@ -123,8 +119,15 @@ export function SearchPage() {
               </div>
             </div>
 
-            {/* {error && <p>Error loading dogs</p>}
-          {loading && <p>Loading...</p>} */}
+            <p>Found {total?.toLocaleString()} dogs</p>
+
+            <button
+              className="bg-[rgba(204,54,169)] hover:bg-[rgba(247,162,50)] hover:text-white font-bold rounded-md px-4 py-2"
+              onClick={openModal}
+            >
+              Find your match
+            </button>
+
           </div>
         )}
       </header>
@@ -146,14 +149,14 @@ export function SearchPage() {
       </main>
       <Modal isOpen={matchModalOpen} onClose={() => setMatchModalOpen(false)}>
         <div className="flex flex-col h-full">
-          <div className="flex justify-between border-b pb-4 drop-shadow-2xl">
+          <div className="flex justify-between  items-center drop-shadow-2xl bg-[rgba(19,10,33)] p-8">
             <div>
-              <h2 className="text-xl font-semibold">Favorite Dogs</h2>
-              <p className="mt-2 text-gray-600">
+              <h2 className="text-2xl font-bold text-white">Favorite Dogs</h2>
+              <p className="mt-2 text-white">
                 Feel free to take a look at your favorites once again
               </p>
             </div>
-            <button onClick={handleFindMatch}>Find match</button>
+            <button className="bg-[rgba(204,54,169)] text-[rgba(247,162,50)] font-bold px-4 py-2 rounded-md" onClick={handleFindMatch}>Find match</button>
           </div>
 
           <div className="py-4 overflow-hidden overflow-y-scroll">
