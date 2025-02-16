@@ -17,7 +17,7 @@ export function DogDetailCard({ dog, imageSrc, altText = "" }: CardProps) {
   const dogIsActive: boolean = favorites[dog.id] != undefined;
 
   return (
-    <div className="relative w-80 h-96 bg-white  overflow-hidden flex flex-col">
+    <div className="relative w-80 h-96 rounded-xl bg-white overflow-hidden flex flex-col">
       {/* Image "Window" */}
       <div className="relative w-full h-[65%] rounded-xl overflow-hidden">
         <Image
@@ -30,7 +30,7 @@ export function DogDetailCard({ dog, imageSrc, altText = "" }: CardProps) {
       </div>
 
       {/* Top Right Square */}
-      <div className="absolute top-4 right-4 w-fit cursor-pointer">
+      <div className="absolute top-3 right-3 w-fit cursor-pointer">
         <HeartButton
           active={dogIsActive}
           onChange={(isActive: boolean) => {
@@ -42,7 +42,7 @@ export function DogDetailCard({ dog, imageSrc, altText = "" }: CardProps) {
 
       {/* Content Section (Fixed Height) */}
       <div className="h-[35%]">
-        <div className="h-full flex flex-col items-center  p-4 justify-between">
+        <div className="h-full flex flex-col items-center  pt-4 justify-between">
           <div className="self-start flex flex-col gap-1">
             {" "}
             <p className="font-bold text-xl self-start">{dog.name}</p>
@@ -53,10 +53,10 @@ export function DogDetailCard({ dog, imageSrc, altText = "" }: CardProps) {
               {" "}
               {`${dog.age} year${dog.age > 1 ? "s" : ""}`}
             </p>
+            <p className="font-medium text-sm text-gray-500">
+              {`${dog.location.city}, ${dog.location.state} ${dog.zip_code}`}
+            </p>
           </div>
-          <p className="font-medium text-sm text-gray-500 self-end">
-            {`${dog.location.city}, ${dog.location.state} ${dog.zip_code}`}
-          </p>
         </div>
       </div>
     </div>

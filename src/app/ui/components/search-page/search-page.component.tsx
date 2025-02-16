@@ -37,6 +37,7 @@ export function SearchPage() {
   const { dogs, total, next, search, loading } = useDogSearch();
   const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [matchDogId, setMatchDog] = useState<string>();
+  const [loadingMatch, setLoadingMatch] = useState(false);
   const { favorites } = useContext(FavoritesContext);
   const favoriteDogs = Object.values(favorites);
   const matchedDogDetail: DogDetail | undefined = favorites[matchDogId ?? ""];
@@ -86,11 +87,14 @@ export function SearchPage() {
   };
   const handleFindMatch = async () => {
     setMatchDog(undefined);
+    setLoadingMatch(true);
     try {
       const matchResponse = await DogMatch(favoriteDogs.map((d) => d.id));
       setMatchDog(matchResponse.match);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error: unknown) {}
+    } catch {
+    } finally {
+      setLoadingMatch(false);
+    }
   };
 
   return (
@@ -109,7 +113,7 @@ export function SearchPage() {
                   onChange={handleSortByChange}
                 />
               </div>
-              <div >
+              <div>
                 <p className="font-semibold pb-2">Direction</p>
                 <OptionDropdown
                   value={sortBy.direction}
@@ -127,7 +131,6 @@ export function SearchPage() {
             >
               Find your match
             </button>
-
           </div>
         )}
       </header>
@@ -147,6 +150,7 @@ export function SearchPage() {
           </div>
         </div>
       </main>
+
       <Modal isOpen={matchModalOpen} onClose={() => setMatchModalOpen(false)}>
         <div className="flex flex-col h-full">
           <div className="flex justify-between  items-center drop-shadow-2xl bg-[rgba(19,10,33)] p-8">
@@ -156,19 +160,39 @@ export function SearchPage() {
                 Feel free to take a look at your favorites once again
               </p>
             </div>
-            <button className="bg-[rgba(204,54,169)] text-[rgba(247,162,50)] font-bold px-4 py-2 rounded-md" onClick={handleFindMatch}>Find match</button>
+            <button
+              className="bg-[rgba(204,54,169)] text-[rgba(247,162,50)] font-bold px-4 py-2 rounded-md"
+              onClick={handleFindMatch}
+            >
+              Find match
+            </button>
           </div>
 
-          <div className="py-4 overflow-hidden overflow-y-scroll">
-            {!matchDogId && <DogGallery dogs={favoriteDogs} />}
-            {matchedDogDetail && (
+          {!matchDogId && !loadingMatch && (
+            <div className="flex p-4 overflow-hidden overflow-y-scroll">
+              <DogGallery dogs={favoriteDogs} />
+            </div>
+          )}
+          {loadingMatch && (
+            <div className="flex flex-col items-center font-bold">
+              <p className="text-5xl whitespace-normal m-6">
+                Finding your match...
+              </p>
+            </div>
+          )}
+
+          {matchedDogDetail && (
+            <div className="flex flex-col items-center font-bold">
+              <p className="text-5xl whitespace-normal m-6">
+                Here is your match!
+              </p>
               <DogDetailCard
                 dog={matchedDogDetail}
                 imageSrc={matchedDogDetail.img}
                 altText={`A ${matchedDogDetail.breed} called ${matchedDogDetail.name}`}
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </Modal>
     </>
