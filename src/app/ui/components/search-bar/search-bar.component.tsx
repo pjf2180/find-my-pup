@@ -9,7 +9,6 @@ import React, { useState, ReactNode, ChangeEvent, useRef } from "react";
 import { FaSearch } from "react-icons/fa";
 import { BreedFilter } from "../breed-filter/breed-filter.component";
 import clsx from "clsx";
-import { useClickOutside } from "../../hooks/useClickOutside";
 import {
   AgeFilter,
   AgeDropdownOptions,
@@ -65,7 +64,6 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
     selectedRange: {},
   });
   const containerRef = useRef<HTMLDivElement>(null);
-  useClickOutside(containerRef, () => setActiveInput(undefined));
   const handleLocationTextInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setLocationInputValue(e.target.value);
   };
@@ -134,6 +132,9 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
     if (i === 2) {
       setActiveInput("location");
     }
+    if (i === -1) {
+      setActiveInput(undefined);
+    }
   };
 
   const results: SearchLocation[] = data?.results ?? [];
@@ -154,14 +155,14 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
       : breedInputValue;
 
   return (
-    <div ref={containerRef} className="flex flex-col p-4 gap-4">
-      <SearchBarBase onSelectionChange={handleSelectionChange}>
+    <div className="flex flex-col  gap-4 bg-red-200">
+      <SearchBarBase
+        ref={containerRef}
+        activeOptionIdx={optionToIdx(activeInput)}
+        onSelectionChange={handleSelectionChange}
+      >
         {/* Breed*/}
-        <div
-         className={clsx(
-          "h-full flex justify-between items-center "
-        )}
-        >
+        <div className={clsx("h-full flex justify-between items-center ")}>
           <div className=" flex flex-col">
             <span className="text-xs font-semibold text-gray-800">Breed</span>
             <input
@@ -182,11 +183,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
         </div>
 
         {/* Age */}
-        <div
-         className={clsx(
-          "h-full flex justify-between items-center "
-        )}
-        >
+        <div className={clsx("h-full flex justify-between items-center ")}>
           <div
             className=" flex flex-col cursor-pointer"
             onClick={() => setActiveInput("age")}
@@ -204,11 +201,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
         </div>
 
         {/* Locations */}
-        <div
-          className={clsx(
-            "h-full flex justify-between items-center "
-          )}
-        >
+        <div className={clsx("h-full flex justify-between items-center ")}>
           <div className="flex flex-col">
             <span className="flex text-xs font-semibold text-gray-800">
               Location
@@ -287,6 +280,19 @@ function Dropdown({ children }: { children: ReactNode }) {
       {children}
     </div>
   );
+}
+
+function optionToIdx(i: SearchInputTypes | undefined): number {
+  if (i === "breed") {
+    return 0;
+  }
+  if (i === "age") {
+    return 1;
+  }
+  if (i === "location") {
+    return 2
+  }
+  return -1;
 }
 
 const SUGGESTED_LOCATIONS: SearchResponse = {

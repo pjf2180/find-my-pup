@@ -1,32 +1,35 @@
 "use client";
 import clsx from "clsx";
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode } from "react";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import React from "react";
 
 interface SearchBarBaseProps {
+  activeOptionIdx: number;
   children: ReactNode;
   onSelectionChange: (idx: number) => void;
+  ref: React.RefObject<HTMLDivElement | null>;
 }
 
-export function SearchBarBase({ children, onSelectionChange }: SearchBarBaseProps) {
-  const [activeOptionIdx, setActiveOptionIdx] = useState(-1);
+export function SearchBarBase({
+  activeOptionIdx,
+  ref,
+  children,
+  onSelectionChange,
+}: SearchBarBaseProps) {
   const barIsActive = activeOptionIdx > -1;
-  const containerRef = useRef<HTMLDivElement>(null);
   const options = React.Children.toArray(children);
-  console.log(options);
 
-  useClickOutside(containerRef, () => {
-    setActiveOptionIdx(-1);
+  useClickOutside(ref, () => {
+    onSelectionChange(-1);
   });
 
   const handleOptionChange = (i: number) => {
-    setActiveOptionIdx(i);
     onSelectionChange(i);
   };
 
   return (
-    <div className="w-[768px] flex flex-col p-4 gap-4" ref={containerRef}>
+    <div className="w-[768px] flex flex-col gap-4" ref={ref}>
       {/* BAR */}
       <div
         className={clsx(
@@ -75,7 +78,7 @@ export function SearchBarBase({ children, onSelectionChange }: SearchBarBaseProp
                   )}
                   onClick={() => handleOptionChange(i)}
                 >
-                  {option}
+                  <div onClick={(e) => e.stopPropagation()}>{option}</div>
                 </div>
 
                 <div

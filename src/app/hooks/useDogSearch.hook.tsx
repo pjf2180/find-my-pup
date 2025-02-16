@@ -46,21 +46,21 @@ export function useDogSearch() {
         from,
       });
 
-      const responseDogDetails: DogDetailResponse[] =
+      const dogDetailsResponse: DogDetailResponse[] =
         dogSearchResponse?.resultIds.length > 0
           ? await fetchDogDetails(dogSearchResponse?.resultIds)
           : [];
+
       const dogLocations = await getLocationsByZipcode(
-        responseDogDetails.map((x) => x.zip_code)
+        dogDetailsResponse.map((x) => x.zip_code)
       );
-      const dogLocationsByZipCode = dogLocations.reduce(
-        (acc: { [zip: string]: SearchLocation }, current) => {
+      const dogLocationsByZipCode = dogLocations
+        .filter((x) => x != null)
+        .reduce((acc: { [zip: string]: SearchLocation }, current) => {
           acc[current.zip_code] = current;
           return acc;
-        },
-        {}
-      );
-      const dogDetails: DogDetail[] = responseDogDetails.map((rd) => ({
+        }, {});
+      const dogDetails: DogDetail[] = dogDetailsResponse.map((rd) => ({
         ...rd,
         location: dogLocationsByZipCode[rd.zip_code],
       }));
