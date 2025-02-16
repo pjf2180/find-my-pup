@@ -95,7 +95,7 @@ export function SearchPage() {
 
   return (
     <>
-      <header className="sticky top-0 z-10 flex flex-col items-center justify-center bg-white shadow-md">
+      <header className="sticky top-0 w-full z-10 flex flex-col items-center justify-center bg-white shadow-md">
         <SearchBar breeds={DOG_BREEDS} onSearch={handleOnSearch} />
         {dogs.length > 0 && (
           <div className="w-full flex flex-row justify-between items-center px-6 border-b border-t">

@@ -18,6 +18,7 @@ import {
 } from "../age-filter/age-filter.component";
 import { LocationFilter } from "../location-filter/location-filter.component";
 import { useDebouncedState } from "@/app/hooks/useDebouncedState";
+import { SearchBarBase } from "../search-bar-base/search-bar-base.components";
 
 type SearchInputTypes = "breed" | "age" | "location";
 
@@ -64,7 +65,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
     selectedRange: {},
   });
   const containerRef = useRef<HTMLDivElement>(null);
-  useClickOutside(containerRef, ()=> setActiveInput(undefined));
+  useClickOutside(containerRef, () => setActiveInput(undefined));
   const handleLocationTextInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setLocationInputValue(e.target.value);
   };
@@ -123,6 +124,18 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
     setBreedInputValue(e.target.value);
   };
 
+  const handleSelectionChange = (i: number) => {
+    if (i === 0) {
+      setActiveInput("breed");
+    }
+    if (i === 1) {
+      setActiveInput("age");
+    }
+    if (i === 2) {
+      setActiveInput("location");
+    }
+  };
+
   const results: SearchLocation[] = data?.results ?? [];
   const cityResults = Object.values(
     results.reduce<Record<string, SearchLocation>>(
@@ -142,19 +155,12 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
 
   return (
     <div ref={containerRef} className="flex flex-col p-4 gap-4">
-      <div
-        className={clsx(
-          "flex items-center bg-white rounded-full shadow-md  w-full max-w-3xl border",
-          { "bg-slate-100": activeInput != undefined }
-        )}
-      >
+      <SearchBarBase onSelectionChange={handleSelectionChange}>
         {/* Breed*/}
         <div
-          className={clsx(
-            "h-full flex justify-between items-center flex-1 relative rounded-full px-8 py-4 pr-0 cursor-pointer ",
-            { "bg-white": activeInput === "breed" },
-            { "hover:bg-gray-200": activeInput != "breed" }
-          )}
+         className={clsx(
+          "h-full flex justify-between items-center "
+        )}
         >
           <div className=" flex flex-col">
             <span className="text-xs font-semibold text-gray-800">Breed</span>
@@ -173,17 +179,13 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
               onClick={() => setActiveInput("breed")}
             ></input>
           </div>
-          {/* Divider */}
-          <div className="h-6 w-px bg-gray-300" />
         </div>
 
         {/* Age */}
         <div
-          className={clsx(
-            "h-full flex justify-between items-center flex-1 relative rounded-full px-8 py-4 pr-0 cursor-pointer ",
-            { "bg-white": activeInput === "age" },
-            { "hover:bg-gray-200": activeInput != "age" }
-          )}
+         className={clsx(
+          "h-full flex justify-between items-center "
+        )}
         >
           <div
             className=" flex flex-col cursor-pointer"
@@ -199,16 +201,12 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
               {ageInputValue}
             </span>
           </div>
-          {/* Divider */}
-          <div className="h-6 w-px bg-gray-300 mx-4" />
         </div>
 
         {/* Locations */}
         <div
           className={clsx(
-            "h-full flex justify-between items-center flex-1 relative rounded-full px-8 py-4 pr-0 cursor-pointer ",
-            { "bg-white": activeInput === "location" },
-            { "hover:bg-gray-200": activeInput != "location" }
+            "h-full flex justify-between items-center "
           )}
         >
           <div className="flex flex-col">
@@ -236,13 +234,12 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
             <FaSearch />
           </button>
         </div>
-      </div>
-
+      </SearchBarBase>
       {/* Dropdowns */}
       <div className="bg-slate-200 relative">
         {activeInput === "breed" && (
           <div className="absolute top-full left-0">
-            <Dropdown >
+            <Dropdown>
               <BreedFilter
                 breadSearchText={breedInputValue}
                 breeds={breeds}
@@ -256,7 +253,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
         )}
         {activeInput === "age" && (
           <div className="absolute top-full left-1/2 -translate-x-1/2">
-            <Dropdown >
+            <Dropdown>
               <AgeFilter
                 state={ageDropdownState}
                 options={AGE_DROPDOWN_OPTIONS}
@@ -267,7 +264,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
         )}
         {activeInput === "location" && (
           <div className="absolute top-full right-0">
-            <Dropdown >
+            <Dropdown>
               <LocationFilter
                 isLoading={loading}
                 suggested={
