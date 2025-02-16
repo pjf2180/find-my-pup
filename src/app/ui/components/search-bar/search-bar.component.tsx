@@ -5,7 +5,13 @@ import {
   SearchResponse,
   useLocationSearch,
 } from "@/app/hooks/useLocationSearch.hook";
-import React, { useState, ReactNode, ChangeEvent, useRef } from "react";
+import React, {
+  useState,
+  ReactNode,
+  ChangeEvent,
+  useRef,
+  MouseEvent,
+} from "react";
 import { FaSearch } from "react-icons/fa";
 import { BreedFilter } from "../breed-filter/breed-filter.component";
 import clsx from "clsx";
@@ -73,7 +79,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
     setSelectedLocation(selection);
   };
 
-  const handleSearchClick = () => {
+  const handleSearchClick = (e: MouseEvent) => {
     const ageRange: AgeRange | undefined =
       AGE_DROPDOWN_OPTIONS[ageDropdownState.selectedOption].value;
 
@@ -89,6 +95,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
     }
     onSearch(filters);
     setActiveInput(undefined);
+    e.stopPropagation();
   };
 
   const handleBreedSelection = (breed: string) => {
@@ -290,7 +297,7 @@ function optionToIdx(i: SearchInputTypes | undefined): number {
     return 1;
   }
   if (i === "location") {
-    return 2
+    return 2;
   }
   return -1;
 }

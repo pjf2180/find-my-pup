@@ -27,15 +27,13 @@ export function SearchBarBase({
   const handleOptionChange = (i: number) => {
     onSelectionChange(i);
   };
-
   return (
     <div className="w-[768px] flex flex-col gap-4" ref={ref}>
       {/* BAR */}
       <div
         className={clsx(
-          "relative flex items-center bg-white rounded-full shadow-md max-w-3xl border h-20 overflow-hidden",
-
-          { "bg-[rgba(232,232,232)]": barIsActive }
+          "relative flex items-center  rounded-full shadow-md max-w-3xl border h-20 overflow-hidden",
+          { "bg-[rgba(232,232,232)]": barIsActive, "bg-white": !barIsActive }
         )}
       >
         {options.map((option, i) => {
@@ -78,7 +76,7 @@ export function SearchBarBase({
                   )}
                   onClick={() => handleOptionChange(i)}
                 >
-                  <div onClick={(e) => e.stopPropagation()}>{option}</div>
+                  {option}
                 </div>
 
                 <div
