@@ -60,9 +60,9 @@ export function useDogSearch() {
           acc[current.zip_code] = current;
           return acc;
         }, {});
-      const dogDetails: DogDetail[] = dogDetailsResponse.map((rd) => ({
-        ...rd,
-        location: dogLocationsByZipCode[rd.zip_code],
+      const dogDetails: DogDetail[] = dogDetailsResponse.map((d) => ({
+        ...d,
+        location: dogLocationsByZipCode[d.zip_code],
       }));
       setDogs((d) => [...d, ...dogDetails]);
       setLatestResponse(dogSearchResponse);
@@ -171,7 +171,7 @@ export interface DogDetailResponse {
   id: string;
 }
 
-export type DogDetail = DogDetailResponse & { location: SearchLocation };
+export type DogDetail = DogDetailResponse & { location?: SearchLocation };
 
 async function fetchDogDetails(ids: string[]): Promise<DogDetailResponse[]> {
   try {

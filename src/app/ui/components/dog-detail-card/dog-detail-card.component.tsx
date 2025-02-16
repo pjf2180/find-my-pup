@@ -54,7 +54,7 @@ export function DogDetailCard({ dog, imageSrc, altText = "" }: CardProps) {
               {`${dog.age} year${dog.age > 1 ? "s" : ""}`}
             </p>
             <p className="font-medium text-sm text-gray-500">
-              {`${dog.location.city}, ${dog.location.state} ${dog.zip_code}`}
+              {`${dog.location?.city}, ${dog.location?.state} ${dog.zip_code}`}
             </p>
           </div>
         </div>
