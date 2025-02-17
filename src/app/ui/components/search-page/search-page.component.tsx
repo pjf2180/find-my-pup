@@ -19,6 +19,8 @@ import { DogMatch } from "@/app/api/endpoints/dogs/dog-match.endpoint";
 import { DogDetailCard } from "../dog-detail-card/dog-detail-card.component";
 import SearchSkeleton from "../search-skeleton/search-skeleton.component";
 import { DogDetail } from "@/app/api/endpoints/dogs/dog-details.endpoint";
+import { logout } from "@/app/api/endpoints/auth/logout";
+import { useRouter } from "next/navigation";
 
 const SORT_OPTIONS: DropdownOption[] = [
   { name: "Breed", value: "breed" },
@@ -31,6 +33,7 @@ const SORT_DIRECTION_OPTIONS: DropdownOption[] = [
 ];
 
 export function SearchPage() {
+  const router = useRouter();
   const [filters, setFilters] = useState<SearchFilters>({});
   const [sortBy, setSortBy] = useState<SearchSortBy>({
     field: "breed",
@@ -187,6 +190,17 @@ export function SearchPage() {
           )}
         </div>
       </Modal>
+      <button
+        className="fixed z-50 top-1 right-1 bg-[#2d1c48] text-white rounded-md p-3"
+        onClick={async () => {
+          try {
+            await logout();
+            router.replace("/login")
+          } catch {}
+        }}
+      >
+        Logout
+      </button>
     </>
   );
 }
