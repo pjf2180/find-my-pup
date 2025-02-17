@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   SearchFilters,
   SearchSortBy,
@@ -12,67 +12,71 @@ import {
 import { DOG_DETAILS, DOG_SEARCH } from "../api/api.types";
 import { getLocationsByZipcode } from "../api/endpoints/locations/locations.endpoint";
 
-export function useDogSearch() {
+export function useDogSearch(params: SearchFilters, sortBy: SearchSortBy) {
   const [latestResponse, setLatestResponse] = useState<DogSearchResponse>();
   const [dogs, setDogs] = useState<DogDetail[]>([]);
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
 
-  const search = async (
-    params: SearchFilters,
-    sortBy: SearchSortBy,
-    from?: number
-  ) => {
-    setLoading(true);
-    if (from === undefined) {
-      setDogs([]);
-    }
+  const search = useCallback(
+    async (from?: number) => {
+      setLoading(true);
+      if (from === undefined) {
+        setDogs([]);
+      }
 
-    try {
-      const { breeds, age, location } = params;
-      const ageMin = age?.min;
-      const ageMax = age?.max;
-      const sort = `${sortBy.field}:${sortBy.direction}`;
-      const city: string = location?.selection.city ?? "";
-      const zipCodes: string[] | undefined =
-        city != "" ? await getZipcodes(city) : undefined;
-      const dogSearchResponse = await fetchDogIds({
-        breeds,
-        ageMin,
-        ageMax,
-        zipCodes,
-        size: 10,
-        sort,
-        from,
-      });
+      try {
+        const { breeds, age, location } = params;
+        const ageMin = age?.min;
+        const ageMax = age?.max;
+        const sort = `${sortBy.field}:${sortBy.direction}`;
+        const city: string = location?.selection.city ?? "";
+        const zipCodes: string[] | undefined =
+          city != "" ? await getZipcodes(city) : undefined;
+        const dogSearchResponse = await fetchDogIds({
+          breeds,
+          ageMin,
+          ageMax,
+          zipCodes,
+          size: 10,
+          sort,
+          from,
+        });
 
-      const dogDetailsResponse: DogDetailResponse[] =
-        dogSearchResponse?.resultIds.length > 0
-          ? await fetchDogDetails(dogSearchResponse?.resultIds)
-          : [];
+        const dogDetailsResponse: DogDetailResponse[] =
+          dogSearchResponse?.resultIds.length > 0
+            ? await fetchDogDetails(dogSearchResponse?.resultIds)
+            : [];
 
-      const dogLocations = await getLocationsByZipcode(
-        dogDetailsResponse.map((x) => x.zip_code)
-      );
-      const dogLocationsByZipCode = dogLocations
-        .filter((x) => x != null)
-        .reduce((acc: { [zip: string]: SearchLocation }, current) => {
-          acc[current.zip_code] = current;
-          return acc;
-        }, {});
-      const dogDetails: DogDetail[] = dogDetailsResponse.map((d) => ({
-        ...d,
-        location: dogLocationsByZipCode[d.zip_code],
-      }));
-      setDogs((d) => [...d, ...dogDetails]);
-      setLatestResponse(dogSearchResponse);
-      setError(undefined);
-    } catch (error: unknown) {
-      setError(error as Error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        const dogLocations = await getLocationsByZipcode(
+          dogDetailsResponse.map((x) => x.zip_code)
+        );
+        const dogLocationsByZipCode = dogLocations
+          .filter((x) => x != null)
+          .reduce((acc: { [zip: string]: SearchLocation }, current) => {
+            acc[current.zip_code] = current;
+            return acc;
+          }, {});
+        const dogDetails: DogDetail[] = dogDetailsResponse.map((d) => ({
+          ...d,
+          location: dogLocationsByZipCode[d.zip_code],
+        }));
+        setDogs((d) => [...d, ...dogDetails]);
+        setLatestResponse(dogSearchResponse);
+        setError(undefined);
+      } catch (error: unknown) {
+        setError(error as Error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [sortBy, params]
+  );
+
+  useEffect(() => {
+    search();
+  }, [params, sortBy, search]);
+
   const nextSearchParams = latestResponse?.next;
   const next = extractFromValue(nextSearchParams);
   const total = latestResponse?.total;

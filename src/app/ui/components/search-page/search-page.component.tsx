@@ -7,7 +7,7 @@ import {
   SortByField,
   SortDirection,
 } from "../search-bar/search-bar.component";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import {
   OptionDropdown,
   DropdownOption,
@@ -35,7 +35,7 @@ export function SearchPage() {
     field: "breed",
     direction: "asc",
   });
-  const { dogs, total, next, search, loading } = useDogSearch();
+  const { dogs, total, next, search, loading } = useDogSearch(filters, sortBy);
   const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [matchDogId, setMatchDog] = useState<string>();
   const [loadingMatch, setLoadingMatch] = useState(false);
@@ -43,26 +43,15 @@ export function SearchPage() {
   const favoriteDogs = Object.values(favorites);
   const matchedDogDetail: DogDetail | undefined = favorites[matchDogId ?? ""];
 
-  useEffect(() => {
-    search(
-      {},
-      {
-        field: "breed",
-        direction: "asc",
-      }
-    );
-  }, []);
-
   const handleOnSearch = (searchData: SearchFilters) => {
     console.log("Breeds: ", searchData.breeds);
     console.log("Age: ", searchData.age);
     console.log("Location: ", searchData.location);
     setFilters(searchData);
-    search(searchData, sortBy);
   };
 
   const handleLoadMore = () => {
-    search(filters, sortBy, next);
+    search(next);
   };
 
   const handleSortByChange = (optionValue: string) => {
@@ -71,7 +60,6 @@ export function SearchPage() {
       direction: "asc",
     };
     setSortBy(updatedSortBy);
-    search(filters, updatedSortBy);
   };
 
   const handleSortDirectionChange = (optionValue: string) => {
@@ -80,7 +68,6 @@ export function SearchPage() {
       direction: optionValue as SortDirection,
     };
     setSortBy(updatedSortBy);
-    search(filters, updatedSortBy);
   };
 
   const openModal = () => {
@@ -101,7 +88,11 @@ export function SearchPage() {
   return (
     <>
       <header className="sticky top-0 w-full z-10 flex flex-col items-center justify-center bg-[rgba(19,10,33)] shadow-md">
-        <SearchBar isLoading={loading} breeds={DOG_BREEDS} onSearch={handleOnSearch} />
+        <SearchBar
+          isLoading={loading}
+          breeds={DOG_BREEDS}
+          onSearch={handleOnSearch}
+        />
         {loading && <SearchSkeleton />}
         {dogs.length > 0 && !loading && (
           <div className="w-full flex flex-row justify-between items-center py-5 px-5 text-[rgba(247,162,50)] border-[rgba(247,162,50)]">
@@ -170,7 +161,7 @@ export function SearchPage() {
 
           {!matchDogId && !loadingMatch && (
             <div className="flex p-4 overflow-hidden overflow-y-scroll">
-              <DogGallery dogs={favoriteDogs} />
+              <DogGallery isLoading={loading} dogs={favoriteDogs} />
             </div>
           )}
           {loadingMatch && (
