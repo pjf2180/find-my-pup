@@ -190,12 +190,18 @@ export function SearchPage() {
           )}
         </div>
       </Modal>
+      <a
+        className="fixed z-50 top-1 left-1 bg-[#2d1c48] text-white rounded-md p-3"
+        href="https://github.com/pjf2180/find-my-pup"
+      >
+        Github
+      </a>
       <button
         className="fixed z-50 top-1 right-1 bg-[#2d1c48] text-white rounded-md p-3"
         onClick={async () => {
           try {
             await logout();
-            router.replace("/login")
+            router.replace("/login");
           } catch {}
         }}
       >
