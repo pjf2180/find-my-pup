@@ -54,11 +54,18 @@ export function DogDetailCard({ dog, imageSrc, altText = "" }: CardProps) {
               {`${dog.age} year${dog.age > 1 ? "s" : ""}`}
             </p>
             <p className="font-medium text-sm text-gray-500">
-              {`${dog.location?.city}, ${dog.location?.state} ${dog.zip_code}`}
+              {formatLocation(dog)}
             </p>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
+function formatLocation(dog: DogDetail) {
+  if (!dog.location) {
+    return `${dog.zip_code}`;
+  }
+  return `${dog.location?.city}, ${dog.location?.state} ${dog.zip_code}`;
 }
