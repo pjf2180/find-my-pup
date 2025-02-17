@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useState } from "react";
-import { DogDetail } from "../hooks/useDogSearch.hook";
+import { DogDetail } from "../api/endpoints/dogs/dog-details.endpoint";
 
 type FavoriteSetter = (dogId: DogDetail, isActive: boolean) => void;
 interface FavoritesContextType {

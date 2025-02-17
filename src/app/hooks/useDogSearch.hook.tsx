@@ -6,15 +6,18 @@ import {
 import {
   fetchLocations,
   LocationSearchParams,
-  SearchLocation,
-  SearchResponse,
 } from "./useLocationSearch.hook";
-import { DOG_DETAILS, DOG_SEARCH } from "../api/api.types";
 import { getLocationsByZipcode } from "../api/endpoints/locations/locations.endpoint";
+import { DogDetail, fetchDogDetails } from "../api/endpoints/dogs/dog-details.endpoint";
+import { DogSearchResponse, fetchDogIds } from "../api/endpoints/dogs/dog-search.endpoint";
+import { DogDetailResponse } from "../api/types/dog.types";
+import { SearchLocation, SearchResponse } from "../api/types/location.types";
 
 export function useDogSearch(params: SearchFilters, sortBy: SearchSortBy) {
   const [latestResponse, setLatestResponse] = useState<DogSearchResponse>();
-  const [dogs, setDogs] = useState<DogDetail[]>([]);
+  const [dogsByPage, setDogsByPage] = useState<{
+    [pageKey: string]: DogDetail[];
+  }>({});
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +25,7 @@ export function useDogSearch(params: SearchFilters, sortBy: SearchSortBy) {
     async (from?: number) => {
       setLoading(true);
       if (from === undefined) {
-        setDogs([]);
+        setDogsByPage({});
       }
 
       try {
@@ -61,7 +64,7 @@ export function useDogSearch(params: SearchFilters, sortBy: SearchSortBy) {
           ...d,
           location: dogLocationsByZipCode[d.zip_code],
         }));
-        setDogs((d) => [...d, ...dogDetails]);
+        setDogsByPage((d) => ({ ...d, [`from-${from}`]: dogDetails }));
         setLatestResponse(dogSearchResponse);
         setError(undefined);
       } catch (error: unknown) {
@@ -80,6 +83,9 @@ export function useDogSearch(params: SearchFilters, sortBy: SearchSortBy) {
   const nextSearchParams = latestResponse?.next;
   const next = extractFromValue(nextSearchParams);
   const total = latestResponse?.total;
+  const dogs = Object.values(dogsByPage).reduce((accu, currentList) => {
+    return [...accu, ...currentList];
+  }, []);
 
   return {
     dogs,
@@ -110,91 +116,4 @@ function extractFromValue(query: string | undefined): number {
   const params = new URLSearchParams(query.split("?")[1]);
   const fromValue = params.get("from");
   return fromValue ? parseInt(fromValue, 10) : 0;
-}
-
-interface DogSearchResponse {
-  resultIds: string[];
-  total: number;
-  next?: string;
-  prev?: string;
-}
-interface DogIdFetchParams {
-  breeds?: string[];
-  zipCodes?: string[];
-  ageMin?: number;
-  ageMax?: number;
-  size?: number;
-  from?: number;
-  sort?: string;
-}
-async function fetchDogIds(
-  params: DogIdFetchParams
-): Promise<DogSearchResponse> {
-  const queryParams = new URLSearchParams();
-
-  if (params.breeds)
-    params.breeds.forEach((breed) => queryParams.append("breeds", breed));
-  if (params.zipCodes)
-    params.zipCodes.forEach((zip) => queryParams.append("zipCodes", zip));
-  if (params.ageMin !== undefined)
-    queryParams.append("ageMin", params.ageMin.toString());
-  if (params.ageMax !== undefined)
-    queryParams.append("ageMax", params.ageMax.toString());
-  if (params.size) queryParams.append("size", params.size.toString());
-  if (params.from) queryParams.append("from", params.from.toString());
-  if (params.sort) queryParams.append("sort", params.sort);
-
-  const url = `${DOG_SEARCH}?${queryParams.toString()}`;
-
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} - ${response.statusText}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Failed to fetch dogs:", error);
-    throw error;
-  }
-}
-
-export interface DogDetailResponse {
-  img: string;
-  name: string;
-  age: number;
-  breed: string;
-  zip_code: string;
-  id: string;
-}
-
-export type DogDetail = DogDetailResponse & { location?: SearchLocation };
-
-async function fetchDogDetails(ids: string[]): Promise<DogDetailResponse[]> {
-  try {
-    const response = await fetch(DOG_DETAILS, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(ids),
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} - ${response.statusText}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Failed to fetch dogs:", error);
-    throw error;
-  }
 }

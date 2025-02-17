@@ -1,5 +1,5 @@
 "use client";
-import { DogDetail, useDogSearch } from "@/app/hooks/useDogSearch.hook";
+import { useDogSearch } from "@/app/hooks/useDogSearch.hook";
 import {
   SearchBar,
   SearchFilters,
@@ -18,6 +18,7 @@ import { FavoritesContext } from "@/app/context/favorites.context";
 import { DogMatch } from "@/app/api/endpoints/dogs/dog-match.endpoint";
 import { DogDetailCard } from "../dog-detail-card/dog-detail-card.component";
 import SearchSkeleton from "../search-skeleton/search-skeleton.component";
+import { DogDetail } from "@/app/api/endpoints/dogs/dog-details.endpoint";
 
 const SORT_OPTIONS: DropdownOption[] = [
   { name: "Breed", value: "breed" },

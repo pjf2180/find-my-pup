@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { LOCATIONS_SEARCH } from "../api/api.types";
+import { SearchResponse } from "../api/types/location.types";
 
 interface Coordinates {
   lat: number;
@@ -15,26 +16,12 @@ interface GeoBoundingBox {
   top_left?: Coordinates;
 }
 
-export interface SearchLocation {
-  city: string;
-  latitude: number;
-  county: string;
-  state: string;
-  zip_code: string;
-  longitude: number;
-}
-
 export interface LocationSearchParams {
   city?: string;
   states?: string[];
   geoBoundingBox?: GeoBoundingBox;
   size?: number;
   from?: number;
-}
-
-export interface SearchResponse {
-  results: SearchLocation[];
-  total: number;
 }
 
 export const useLocationSearch = () => {

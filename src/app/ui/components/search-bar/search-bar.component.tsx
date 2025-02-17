@@ -1,8 +1,6 @@
 "use client";
 import {
   LocationSearchParams,
-  SearchLocation,
-  SearchResponse,
   useLocationSearch,
 } from "@/app/hooks/useLocationSearch.hook";
 import React, {
@@ -24,6 +22,7 @@ import {
 import { LocationFilter } from "../location-filter/location-filter.component";
 import { useDebouncedState } from "@/app/hooks/useDebouncedState";
 import { SearchBarBase } from "../search-bar-base/search-bar-base.components";
+import { SearchLocation, SearchResponse } from "@/app/api/types/location.types";
 
 type SearchInputTypes = "breed" | "age" | "location";
 

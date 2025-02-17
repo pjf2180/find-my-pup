@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import Image from "next/image";
 import HeartButton from "../heart-button/heart-button";
 import { FavoritesContext } from "@/app/context/favorites.context";
-import { DogDetail } from "@/app/hooks/useDogSearch.hook";
+import { DogDetail } from "@/app/api/endpoints/dogs/dog-details.endpoint";
 
 type CardProps = {
   dog: DogDetail;

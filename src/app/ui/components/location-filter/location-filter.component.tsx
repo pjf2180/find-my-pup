@@ -1,4 +1,4 @@
-import { SearchLocation } from "@/app/hooks/useLocationSearch.hook";
+import { SearchLocation } from "@/app/api/types/location.types";
 
 export interface LocationDropdownProps {
   suggested: SearchLocation[];

@@ -1,5 +1,5 @@
-import { SearchLocation } from "@/app/hooks/useLocationSearch.hook";
 import { LOCATIONS } from "../../api.types";
+import { SearchLocation } from "../../types/location.types";
 
 export async function getLocationsByZipcode(
   zipcodes: string[]
@@ -20,7 +20,7 @@ export async function getLocationsByZipcode(
 
     return await response.json();
   } catch (error: unknown) {
-    console.error("Could retrieve locations by zipcodes");
+    console.error("Could not retrieve locations by zipcodes");
     throw error;
   }
 }

@@ -1,4 +1,4 @@
-import { DogDetail } from "@/app/hooks/useDogSearch.hook";
+import { DogDetail } from "@/app/api/endpoints/dogs/dog-details.endpoint";
 import { DogDetailCard } from "../dog-detail-card/dog-detail-card.component";
 
 interface DogGalleryProps {
