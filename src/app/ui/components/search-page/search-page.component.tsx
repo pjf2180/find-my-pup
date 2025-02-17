@@ -17,6 +17,7 @@ import { DogGallery } from "../dog-gallery/dog-gallery.component";
 import { FavoritesContext } from "@/app/context/favorites.context";
 import { DogMatch } from "@/app/api/endpoints/dogs/dog-match.endpoint";
 import { DogDetailCard } from "../dog-detail-card/dog-detail-card.component";
+import SearchSkeleton from "../search-skeleton/search-skeleton.component";
 
 const SORT_OPTIONS: DropdownOption[] = [
   { name: "Breed", value: "breed" },
@@ -100,9 +101,10 @@ export function SearchPage() {
   return (
     <>
       <header className="sticky top-0 w-full z-10 flex flex-col items-center justify-center bg-[rgba(19,10,33)] shadow-md">
-        <SearchBar breeds={DOG_BREEDS} onSearch={handleOnSearch} />
-        {dogs.length > 0 && (
-          <div className="w-full flex flex-row justify-between items-center py-5 px-5 text-[rgba(247,162,50)] border-[rgba(247,162,50)] border-t">
+        <SearchBar isLoading={loading} breeds={DOG_BREEDS} onSearch={handleOnSearch} />
+        {loading && <SearchSkeleton />}
+        {dogs.length > 0 && !loading && (
+          <div className="w-full flex flex-row justify-between items-center py-5 px-5 text-[rgba(247,162,50)] border-[rgba(247,162,50)]">
             {/* {Sorting} */}
             <div className="flex flew-row">
               <div className="mr-4 cursor-pointer">
@@ -136,18 +138,16 @@ export function SearchPage() {
       </header>
 
       <main className="flex flex-col items-center pt-4 min-h-screen">
-        <div className="container">
-          <DogGallery dogs={dogs} />
-          <div className="w-full flex justify-center p-4">
-            {!loading && !!next && (
-              <button
-                className="bg-black text-white p-4"
-                onClick={handleLoadMore}
-              >
-                Load More
-              </button>
-            )}
-          </div>
+        <DogGallery isLoading={loading} dogs={dogs} />
+        <div className="w-full flex justify-center p-4">
+          {!loading && !!next && (
+            <button
+              className="bg-black text-white p-4"
+              onClick={handleLoadMore}
+            >
+              Load More
+            </button>
+          )}
         </div>
       </main>
 

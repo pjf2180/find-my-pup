@@ -43,11 +43,12 @@ export interface SearchFilters {
 }
 
 export interface SearchBarProps {
+  isLoading: boolean;
   breeds: string[];
   onSearch: (filters: SearchFilters) => void;
 }
 
-export function SearchBar({ breeds, onSearch }: SearchBarProps) {
+export function SearchBar({ isLoading, breeds, onSearch }: SearchBarProps) {
   const defaultAgeInputValue = "Search by age";
   const [breedInputValue, setBreedInputValue] = useState("");
   const [ageInputValue, setAgeInputValue] = useState(defaultAgeInputValue);
@@ -164,6 +165,7 @@ export function SearchBar({ breeds, onSearch }: SearchBarProps) {
   return (
     <div className="flex flex-col pt-4 gap-4 ">
       <SearchBarBase
+        isLoading={isLoading}
         ref={containerRef}
         activeOptionIdx={optionToIdx(activeInput)}
         onSelectionChange={handleSelectionChange}

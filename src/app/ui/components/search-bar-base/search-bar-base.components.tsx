@@ -5,6 +5,7 @@ import { useClickOutside } from "../../hooks/useClickOutside";
 import React from "react";
 
 interface SearchBarBaseProps {
+  isLoading: boolean;
   activeOptionIdx: number;
   children: ReactNode;
   onSelectionChange: (idx: number) => void;
@@ -12,6 +13,7 @@ interface SearchBarBaseProps {
 }
 
 export function SearchBarBase({
+  isLoading,
   activeOptionIdx,
   ref,
   children,
@@ -27,12 +29,19 @@ export function SearchBarBase({
   const handleOptionChange = (i: number) => {
     onSelectionChange(i);
   };
+  if (isLoading) {
+    return (
+      <div className="w-[768px] flex flex-col gap-4">
+        <div className="bg-gray-700 animate-pulse relative flex items-center rounded-full shadow-md max-w-3xl h-20 overflow-hidden"></div>
+      </div>
+    );
+  }
   return (
     <div className="w-[768px] flex flex-col gap-4" ref={ref}>
       {/* BAR */}
       <div
         className={clsx(
-          "relative flex items-center  rounded-full shadow-md max-w-3xl border h-20 overflow-hidden",
+          "relative flex items-center rounded-full shadow-md max-w-3xl border h-20 overflow-hidden",
           { "bg-[rgba(232,232,232)]": barIsActive, "bg-white": !barIsActive }
         )}
       >
